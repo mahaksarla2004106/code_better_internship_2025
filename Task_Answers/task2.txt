@@ -1,0 +1,180 @@
+CREATE DATABASE Ola;
+ USE OLA;
+ 
+CREATE TABLE Drivers(
+diver_id int primary key,
+first_name VARCHAR(100),
+last_name VARCHAR(100),
+phone VARCHAR(14),
+city VARCHAR(50),
+vehicletype ENUM("Sedan","Hatchback","SUV"),
+rating INT CHECK(rating BETWEEN 0 AND 5)
+);
+
+CREATE  TABLE riders(
+rider_id  INT PRIMARY KEY ,
+first_name VARCHAR(100),
+ last_name VARCHAR(100),
+phone VARCHAR(14),
+city VARCHAR(50),
+joindate DATE );
+
+CREATE TABLE rides(
+ride_id INT PRIMARY KEY,
+rider_id INT ,
+driver_id INT,
+ridedate DATE,
+pickup_loc TEXT,
+drop_loc TEXT,
+distance DECIMAL ,
+fare DECIMAL,
+ride_status ENUM("Completed","Cancelled","Ongoing"));
+
+CREATE TABLE  payments(
+payments_id INT PRIMARY KEY ,
+ride_id INT ,
+payment_method ENUM("CARD","CASH","WALLET") ,
+amount int ,
+payment_date DATETIME);
+
+# FK IN RIDES TABLE REFERANCE RIDERS TABLE
+ALTER TABLE rides 
+ADD CONSTRAINT FK_rides 
+FOREIGN KEY (rider_id)
+REFERENCES riders( rider_id);
+
+# FK IN RIDES TABLE REFERANCE DRIVERS TABLE
+ALTER TABLE rides
+ADD CONSTRAINT FK_ride
+FOREIGN KEY (driver_id)
+REFERENCES drivers (diver_id);
+
+# FK IN PAYMENTS TABLE REFERANCE RIDES TABLE
+ALTER TABLE payments
+ADD CONSTRAINT FK_PAY
+FOREIGN KEY (ride_id)
+REFERENCES RIDES (RIDE_ID );
+
+
+INSERT INTO Drivers
+ (diver_id,first_name , last_name, Phone, City, VehicleType, Rating)
+ VALUES
+(1, 'John', 'Smith', '123-456-7890', 'New York', 'Sedan', 4.5),
+(2, 'Emily', 'Johnson', '987-654-3210', 'Los Angeles', 'SUV', 4.8),
+(3, 'Ahmed', 'Khan', '456-789-1234', 'Chicago', 'Hatchback', 4.2),
+(4, 'Priya', 'Patel', '321-654-9870', 'Houston', 'Sedan', 4.7),
+(5, 'David', 'Lee', '789-123-4567', 'Miami', 'SUV', 4.6);
+
+INSERT INTO Riders (rider_id , first_name ,last_name , Phone, City, JoinDate) 
+VALUES
+(1, 'Sarah', 'Williams', '111-222-3333', 'New York', '2023-01-15'),
+(2, 'Mark', 'Brown', '222-333-4444', 'Los Angeles', '2022-12-10'),
+(3, 'Aisha', 'Ahmed', '333-444-5555', 'Chicago', '2023-02-20'),
+(4, 'Liam', 'Garcia', '444-555-6666', 'Houston', '2023-03-05'),
+(5, 'Sophia', 'Davis', '555-666-7777', 'Miami', '2023-01-25');
+
+
+INSERT INTO Rides (ride_id , rider_id, driver_id, ridedate, pickup_loc, drop_loc, distance, fare, ride_Status)
+ VALUES
+(1, 1, 2, '2023-12-20', 'Times Square', 'Central Park', 5.2, 15.50, 'Completed'),
+(2, 3, 1, '2023-12-22', 'Downtown Chicago', 'O\'Hare Airport', 28.5, 45.00, 'Completed'),
+(3, 4, 3, '2024-01-05', 'Houston Museum', 'Rice University', 3.7, 10.00, 'Completed'),
+(4, 5, 4, '2024-01-10', 'Miami Beach', 'Wynwood', 8.0, 20.75, 'Cancelled'),
+(5, 2, 5, '2024-01-15', 'Hollywood', 'Beverly Hills', 12.3, 35.00, 'Ongoing');
+
+
+select * from rides;
+
+INSERT INTO payments (payments_id,ride_id, payment_method ,amount,payment_date)
+VALUES 
+(1, 1, 'Card', 15.50, '2025-01-01'),
+(2, 2, 'Cash', 12.00, '2025-01-02'),
+(3, 3, 'Wallet', 18.75, '2025-01-03'),
+(4, 4, 'Card', 22.00, '2025-01-04'),
+(5, 5, 'Cash', 9.25, '2025-01-05');
+
+select * from payments;
+
+#Retrieve the names and contact details of all drivers with a rating of 4.5 or higher.
+SELECT  first_name,phone
+FROM drivers
+WHERE  rating >= 4.5 ;
+
+# 2. Find the total number of rides completed by each driver.
+SELECT first_name
+FROM drivers d
+JOIN Rides r 
+ON r.driver_id = d.diver_id
+WHERE r.ride_status ="completed";
+
+# 3. List all riders who have never booked a ride.
+SELECT first_name
+FROM drivers d
+JOIN Rides r 
+ON r.driver_id = d.diver_id
+WHERE r.ride_status <>"completed";
+
+# 4. Calculate the total earnings of each driver from completed rides.
+SELECT d.diver_id AS Driver_ID,
+    d.first_name AS Driver_FirstName,
+    d.last_name AS Driver_LastName,
+    SUM(r.fare) AS Total_Earnings
+FROM rides r
+JOIN drivers d
+ON r.driver_id = d.diver_id
+WHERE r.ride_status = 'Completed'
+GROUP BY d.diver_id, d.first_name, d.last_name;
+
+# Retrieve the most recent ride for each rider. 
+SELECT rt.first_name,
+    rt.last_name,
+    MAX(rd.ridedate) AS curr_date
+FROM Riders AS rt
+JOIN Rides AS rd
+ON rt.rider_id =rd.rider_id
+GROUP BY rt.rider_id;
+
+#  Count the number of rides taken in each city.
+SELECT pickup_loc,
+    drop_loc,
+    COUNT(ride_id) AS count_rid
+FROM Rides
+GROUP BY pickup_loc,drop_loc;
+
+# List all rides where the distance was greater than 20 km.
+SELECT *
+FROM Rides
+WHERE distance >=20;
+
+#Identify the most preferred payment method.
+SELECT
+	payment_method,
+    COUNT(payment_method) AS num
+FROM Payments
+GROUP BY payment_method
+ORDER BY num DESC
+LIMIT 1;
+
+
+ USE OLA;
+
+#Find the top 3 highest-earning drivers.
+
+SELECT dr.first_name,
+    SUM(rd.fare) AS far
+FROM Drivers AS dr
+JOIN Rides AS rd
+ON rd.driver_id = dr.diver_id
+GROUP BY dr.diver_id,dr.first_name
+ORDER BY far DESC
+LIMIT 3;
+
+#Retrieve details of all cancelled rides along with the rider's and driver's names
+SELECT CONCAT(dr.first_name,' ',dr.last_name) AS driver_name,
+  CONCAT(rt.first_name,' ',rt.last_name) AS rider_name
+FROM Drivers AS dr
+JOIN Rides AS rd
+ON rd.driver_id = dr.diver_id
+JOIN Riders AS rt 
+ON rt.rider_id = rd.rider_id
+WHERE rd.ride_status='Cancelled';

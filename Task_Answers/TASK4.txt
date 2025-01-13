@@ -1,0 +1,92 @@
+CREATE DATABASE HR_MANAGEMENT;
+USE HR_MANAGEMENT;
+
+CREATE TABLE Employees(
+  employee_id VARCHAR(100) PRIMARY KEY,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  email VARCHAR(100),
+  phone VARCHAR(100),
+  hire_date DATE,
+  department_id VARCHAR(100),
+  manager_id VARCHAR(100),
+  salary INT
+);
+
+CREATE TABLE departments(
+  department_id VARCHAR(100) PRIMARY KEY,
+  department_name VARCHAR(100),
+  manager_id VARCHAR(100)
+);
+
+CREATE TABLE Performance_Reviews(
+  review_id VARCHAR(100) PRIMARY KEY,
+  employee_id VARCHAR(100),
+  review_date DATE,
+  score ENUM('Excellent','Good','Average','Poor'),
+  comments TEXT
+);
+
+CREATE TABLE payroll(
+  payroll_id VARCHAR(100) PRIMARY KEY,
+  employee_id VARCHAR(100),
+  payment_date DATE,
+  amount DECIMAL(10,2),
+  pay_method ENUM('Bank_Transfer','Check','Cash')
+);
+
+#FK IN EMPLOYEE TABLE REFERENCE TO DEPARTMENTS TABLE 
+ALTER TABLE Employees
+ADD CONSTRAINT fk_employees_department
+FOREIGN KEY (department_id) REFERENCES departments(department_id);
+
+# FK IN EMPLOYEE TABLE REFERENCE TO EMPLOYEE TABLE (Manager)
+ALTER TABLE Employees
+ADD CONSTRAINT fk_employees_manager
+FOREIGN KEY (manager_id) REFERENCES Employees(employee_id);
+
+# FK IN DEPARTMENTS TABLE REFERENCE TO EMPLOYEE TABLE (Manager)
+ALTER TABLE departments
+ADD CONSTRAINT fk_departments_manager
+FOREIGN KEY (manager_id) REFERENCES Employees(employee_id);
+
+# FK IN PERFORMANCE REVIEWS TABLE REFERENCE TO EMPLOYEE TABLE
+ALTER TABLE Performance_Reviews
+ADD CONSTRAINT fk_performance_reviews_employee
+FOREIGN KEY (employee_id) REFERENCES Employees(employee_id);
+
+-- FK IN PAYROLL TABLE REFERENCE TO EMPLOYEE TABLE
+ALTER TABLE payroll
+ADD CONSTRAINT fk_payroll_employee
+FOREIGN KEY (employee_id) REFERENCES Employees(employee_id);
+
+INSERT INTO departments (department_id, department_name, manager_id)
+VALUES 
+('D001', 'Human Resources', 'E003'),
+('D002', 'Finance', 'E004'),
+('D003', 'IT', 'E005'),
+('D004', 'Sales', 'E006');
+
+INSERT INTO Employees (employee_id, first_name, last_name, email, phone, hire_date, department_id, manager_id, salary)
+VALUES
+('E003', 'John', 'Doe', 'john.doe@example.com', '1234567890', '2020-01-15', 'D003', NULL, 90000),
+('E004', 'Jane', 'Smith', 'jane.smith@example.com', '1234567891', '2021-02-20', 'D003', NULL, 95000),
+('E005', 'Sam', 'Brown', 'sam.brown@example.com', '1234567892', '2019-03-10', 'D001', NULL, 80000),
+('E006', 'Mike', 'Johnson', 'mike.johnson@example.com', '1234567893', '2018-04-25', 'D002', NULL, 85000),
+('E007', 'Sarah', 'Taylor', 'sarah.taylor@example.com', '1234567894', '2022-07-05', 'D004', 'E003', 75000);
+
+INSERT INTO Performance_Reviews (review_id, employee_id, review_date, score, comments)
+VALUES
+('R001', 'E003', '2023-03-01', 'Excellent', 'Outstanding performance on project delivery.'),
+('R002', 'E004', '2023-03-01', 'Good', 'Consistent work, improvement in communication.'),
+('R003', 'E005', '2023-03-01', 'Average', 'Meeting expectations, could improve teamwork.'),
+('R004', 'E006', '2023-03-01', 'Excellent', 'Exceptional leadership in the finance team.'),
+('R005', 'E007', '2023-03-01', 'Good', 'Maintains high productivity consistently.');
+
+INSERT INTO payroll (payroll_id, employee_id, payment_date, amount, pay_method)
+VALUES
+('P001', 'E003', '2023-12-01', 4500.00, 'Bank_Transfer'),
+('P002', 'E004', '2023-12-01', 4750.00, 'Bank_Transfer'),
+('P003', 'E005', '2023-12-01', 5000.00, 'Bank_Transfer'),
+('P004', 'E006', '2023-12-01', 5250.00, 'Check'),
+('P005', 'E007', '2023-12-01', 3500.00, 'Cash');
