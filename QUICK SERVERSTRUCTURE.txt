@@ -148,3 +148,53 @@ ALTER TABLE NOTIFICATION
 ADD CONSTRAINT fk_NOTIFIY
 FOREIGN KEY (USER_ID )
 REFERENCES USERS(USER_ID);
+
+INSERT INTO USERS (USER_ID, NAME, MOBILE, EMAIL, PASSWORD, ROLE) VALUES
+(1, 'Alice Johnson', '9876543210', 'alice.johnson@example.com', 'password123', 'Admin'),
+(2, 'Bob Smith', '9123456780', 'bob.smith@example.com', 'securepass', 'Service Provider'),
+(3, 'Cathy Lee', '9891234567', 'cathy.lee@example.com', 'mypassword', 'Customer'),
+(4, 'David Clark', '9878901234', 'david.clark@example.com', 'pass1234', 'Service Provider'),
+(5, 'Emma Watson', '9887654321', 'emma.watson@example.com', 'watson321', 'Customer');
+
+ALTER TABLE BUSINESSES
+MODIFY COLUMN CONTACT_INFO BIGINT;
+
+
+INSERT INTO BUSINESSES (BUSINESSES_ID, USER_ID, BUSINESS_NAME, ADDRESS, CONTACT_INFO, LOGO_URL) VALUES
+(1, 2, 'Bob\'s Plumbing Services', '123 Main St', 9876543210, 'https://example.com/logo1.png'),
+(2, 2, 'FixIt Electricals', '456 Elm St', 1234567890, 'https://example.com/logo2.png');
+
+INSERT INTO CATEGORIES (CATEGORY_ID, CATEGORY_NAME) VALUES
+(1, 'Home Services'),
+(2, 'Automotive'),
+(3, 'Health & Wellness');
+
+INSERT INTO SUBCATEGORIES (SUBCATEGORY_ID, CATEGORY_ID, SUBCATEGORY_NAME) VALUES
+(1, 1, 'Plumbing'),
+(2, 1, 'Electrical'),
+(3, 3, 'Massage Therapy');
+
+INSERT INTO SERVICES (SERVICE_ID, BUSINESS_ID, SUBCATEGORY_ID, SERVICE_NAME, DESCRIPTION, PRICE) VALUES
+(1, 1, 1, 'Leak Repair', 'Fixing water leaks in pipes', 100),
+(2, 2, 2, 'Wiring Installation', 'Installing new electrical wiring', 200),
+(3, 2, 3, 'Relaxing Massage', 'One-hour relaxing massage session', 150);
+
+INSERT INTO APPOINTMENTS (APPOINTMENT_ID, SERVICE_ID, USER_ID, APPOINTMENT_DATE, TIME_SLOT, STATUS) VALUES
+(1, 1, 1, '2025-02-01', '10:00 AM', 'Booked'),
+(2, 2, 1, '2025-02-02', '2:00 PM', 'Cancelled'),
+(3, 3, 1, '2025-02-03', '5:00 PM', 'Completed');
+
+INSERT INTO PAYMENTS (PAYMENT_ID, APPOINTMENT_ID, AMOUNT, PAYMENT_METHOD, STATUS) VALUES
+(1, 1, 100, 'Credit Card', 'PAID'),
+(2, 2, 200, 'PayPal', 'FAILED'),
+(3, 3, 150, 'Credit Card', 'PAID');
+
+INSERT INTO REVIEWS (REVIWE_ID, SERVICE_ID, USER_ID, RATEING, COMMENT) VALUES
+(1, 1, 1, 5, 'Great service! Highly recommended.'),
+(2, 2, 1, 4, 'Good service but a bit expensive.'),
+(3, 3, 1, 5, 'Amazing experience!');
+
+INSERT INTO NOTIFICATION (NOTIFICATION_ID, USER_ID, MESSAGE, IS_READ) VALUES
+(1, 1, 'Your appointment for Leak Repair has been booked.', FALSE),
+(2, 1, 'Your payment for Wiring Installation failed.', TRUE),
+(3, 1, 'Your review for Relaxing Massage has been submitted.', FALSE);
