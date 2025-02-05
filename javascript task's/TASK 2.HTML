@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Feed App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .article { margin-bottom: 20px; }
+        .article img { max-width: 100%; height: auto; }
+
+    body {
+        background-color: #f8f9fa; /* Light gray background */
+    }
+
+    h2 {
+        color: #343a40; /* Dark gray for the heading */
+    }
+
+    /* General Button Styles */
+    button, .btn {
+        border-radius: 8px;              /* Rounded corners */
+        padding: 10px 20px;              /* Spacing */
+        transition: all 0.3s ease;       /* Smooth hover transitions */
+        font-weight: 600;                /* Bold text */
+    }
+
+    /* Add Article Button */
+    .btn-primary {
+        background-color: #636465;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #4e5052;       /* Darker blue on hover */
+        transform: scale(1.05);          /* Slight zoom effect */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Pagination Buttons */
+    .page-btn {
+        background-color: #ffffff;
+        border: 2px solid #434344;
+        color: #737679;
+        margin: 0 5px;
+        min-width: 40px;
+    }
+
+    .page-btn:hover {
+        background-color: #7c7c7c;
+        color: white;
+    }
+
+    .page-btn.active {
+        background-color: #72787e;
+        color: white;
+        cursor: default;
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Previous/Next Buttons */
+    #prev-btn, #next-btn {
+        background-color: #6c757d;
+        border: none;
+        color: white;
+    }
+
+    #prev-btn:hover, #next-btn:hover {
+        background-color: #5a6268;
+     
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    #prev-btn:disabled, #next-btn:disabled {
+        background-color: #adb5bd;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+   
+  </style>
+
+  
+</head>
+<body class="container mt-4">
+    <h2 class="text-center">News Feed App</h2>
+    
+    <form id="articleForm" class="mb-4">
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" id="title" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea id="description" class="form-control" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Image URL (optional)</label>
+            <input type="text" id="imageUrl" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-secondary">Add Article</button>
+    </form>
+    
+    <div id="newsFeed" class="row"></div>
+    
+    <!-- Pagination Controls -->
+    <nav>
+        <ul class="pagination justify-content-center mt-4">
+            <li class="page-item">
+                <button class="page-link" id="prev-btn">Previous</button>
+            </li>
+            <li id="page-numbers" class="pagination"></li>
+            <li class="page-item">
+                <button class="page-link" id="next-btn">Next</button>
+            </li>
+        </ul>
+    </nav>
+
+    <script>
+        const articles = [];
+        const articlesPerPage = 4;
+        let currentPage = 1;
+
+        // DOM Elements
+        const articleForm = document.getElementById('articleForm');
+        const articlesContainer = document.getElementById('newsFeed');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageNumbers = document.getElementById('page-numbers');
+
+        // Add article
+        articleForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const imageUrl = document.getElementById('imageUrl').value.trim();
+
+            if (title && description) {
+                articles.push({ title, description, imageUrl });
+                articleForm.reset();
+                currentPage = Math.ceil(articles.length / articlesPerPage); // Go to the last page
+                renderArticles();
+                renderPagination();
+            }
+        });
+
+        // Render articles
+        function renderArticles() {
+            articlesContainer.innerHTML = '';
+            const startIndex = (currentPage - 1) * articlesPerPage;
+            const endIndex = startIndex + articlesPerPage;
+            const articlesToShow = articles.slice(startIndex, endIndex);
+
+            articlesToShow.forEach((article) => {
+                const articleElement = document.createElement('div');
+                articleElement.classList.add('article', 'card', 'p-3', 'mb-3');
+
+                articleElement.innerHTML = `
+                    <h3>${article.title}</h3>
+                    <p>${article.description}</p>
+                    ${article.imageUrl ? `<img src="${article.imageUrl}" alt="${article.title}" class="img-fluid">` : ''}
+                `;
+                articlesContainer.appendChild(articleElement);
+            });
+        }
+
+        // Render pagination
+        function renderPagination() {
+            pageNumbers.innerHTML = '';
+            const totalPages = Math.ceil(articles.length / articlesPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.classList.add('btn', 'btn-outline-primary', 'mx-1', 'page-btn');
+
+                if (i === currentPage) {
+                    pageButton.classList.add('active');
+                    pageButton.disabled = true;
+                }
+
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderArticles();
+                    renderPagination();
+                });
+
+                pageNumbers.appendChild(pageButton);
+            }
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Handle Previous button
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderArticles();
+                renderPagination();
+            }
+        });
+
+        // Handle Next button
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < Math.ceil(articles.length / articlesPerPage)) {
+                currentPage++;
+                renderArticles();
+                renderPagination();
+            }
+        });
+    </script>
+</body>
+</html>
